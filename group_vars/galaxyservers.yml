@@ -18,14 +18,27 @@ galaxy_job_config:
     local_runner:
       load: galaxy.jobs.runners.local:LocalJobRunner
       workers: 4
+    slurm:
+      load: galaxy.jobs.runners.slurm:SlurmJobRunner
+      drmaa_library_path: /usr/lib/slurm-drmaa/lib/libdrmaa.so.1
   handling:
     assign: ['db-skip-locked']
   execution:
-    default: singularity
+    default: slurm
     environments:
       local_env:
         runner: local_runner
         tmp_dir: true
+      slurm:
+        runner: slurm
+        singularity_enabled: true
+        env:
+        - name: LC_ALL
+          value: C
+        - name: SINGULARITY_CACHEDIR
+          value: /tmp/singularity
+        - name: SINGULARITY_TMPDIR
+          value: /tmp
       singularity:
         runner: local_runner
         singularity_enabled: true
@@ -86,6 +99,9 @@ galaxy_config:
     # Tool Dependencies
     dependency_resolvers_config_file: "{{ galaxy_config_dir }}/dependency_resolvers_conf.xml"
     containers_resolvers_config_file: "{{ galaxy_config_dir }}/container_resolvers_conf.yml"
+    # Data Library Directories
+    library_import_dir: /libraries/admin
+    user_library_import_dir: /libraries/user
   gravity:
     process_manager: systemd
     galaxy_root: "{{ galaxy_root }}/server"
@@ -178,6 +194,16 @@ nginx_conf_http:
 nginx_ssl_role: usegalaxy_eu.certbot
 nginx_conf_ssl_certificate: /etc/ssl/certs/fullchain.pem
 nginx_conf_ssl_certificate_key: /etc/ssl/user/privkey-www-data.pem
+
+# Slurm
+slurm_roles: ['controller', 'exec'] # Which roles should the machine play? exec are execution hosts.
+slurm_nodes:
+- name: localhost # Name of our host
+  CPUs: 2         # Here you would need to figure out how many cores your machine has. For this training we will use 2 but in real life, look at `htop` or similar.
+slurm_config:
+  SlurmdParameters: config_overrides   # Ignore errors if the host actually has cores != 2
+  SelectType: select/cons_res
+  SelectTypeParameters: CR_CPU_Memory  # Allocate individual cores/memory instead of entire node
 
 # TUS
 galaxy_tusd_port: 1080
