@@ -123,7 +123,9 @@ galaxy_config:
     celery_conf:
       result_backend: "redis://localhost:6379/0"
     enable_celery_tasks: true
-
+    # Monitoring
+    statsd_host: localhost
+    statsd_influxdb: true
   gravity:
     process_manager: systemd
     galaxy_root: "{{ galaxy_root }}/server"
@@ -323,3 +325,12 @@ flower_ui_users:
 flower_environment_variables:
   GALAXY_CONFIG_FILE: "{{ galaxy_config_file }}"
 
+
+# Telegraf
+telegraf_plugins_extra:
+  listen_galaxy_routes:
+    plugin: "statsd"
+    config:
+      - service_address = ":8125"
+      - metric_separator = "."
+      - allowed_pending_messages = 10000
