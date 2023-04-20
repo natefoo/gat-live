@@ -104,7 +104,7 @@ server {
 	}
 
 	location /reports/ {
-		proxy_pass http://unix:{{ galaxy_config.gravity.reports.bind }}:/;
+		proxy_pass http://{{ galaxy_config.gravity.reports.bind }}:/;
 	}
 
 
