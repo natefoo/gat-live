@@ -47,3 +47,5 @@ telegraf_plugins_default:
   - plugin: net
   - plugin: netstat
   
+
+sentry_domain: "gat.{{ groups['galaxyservers'][0] }}"

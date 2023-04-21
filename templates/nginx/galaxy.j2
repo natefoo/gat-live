@@ -1,3 +1,5 @@
+proxy_read_timeout 300s;
+
 upstream galaxy {
 	server unix:{{ galaxy_mutable_config_dir }}/gunicorn.sock;
 
@@ -112,6 +114,7 @@ server {
 		proxy_set_header Host $http_host;
 	}
 
+	{{ tiaas_nginx_routes }}
 
 
 

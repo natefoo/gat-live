@@ -61,6 +61,7 @@ galaxy_job_config:
 
 galaxy_local_tools:
  - testing.xml
+ - job_properties.xml
 
 galaxy_job_config_file: "{{ galaxy_config_dir }}/galaxy.yml"
 
@@ -91,7 +92,7 @@ galaxy_config:
     # File serving Performance
     nginx_x_accel_redirect_base: /_x_accel_redirect
     # Automation / Ease of Use / User-facing features
-    watch_job_rules: 'auto'
+    #watch_job_rules: 'auto'  # disabled due to watchdog issue
     allow_path_paste: true
     enable_quotas: true
     allow_user_deletion: true
@@ -126,6 +127,9 @@ galaxy_config:
     # Monitoring
     statsd_host: localhost
     statsd_influxdb: true
+    sentry_dsn: "{{ vault_galaxy_sentry_dsn }}"
+    sentry_traces_sample_rate: 0.5
+    error_report_file: "{{ galaxy_config_dir }}/error_reports_file.yml"
   gravity:
     process_manager: systemd
     galaxy_root: "{{ galaxy_root }}/server"
@@ -172,6 +176,8 @@ galaxy_config_files:
     dest: "{{ galaxy_config.galaxy.themes_config_file }}"
   - src: files/galaxy/config/tpv_rules_local.yml
     dest: "{{ tpv_mutable_dir }}/tpv_rules_local.yml"
+  - src: files/galaxy/config/error_reports.yml
+    dest: "{{ galaxy_config.galaxy.error_report_file }}"
 
 
 galaxy_config_templates:
@@ -210,6 +216,7 @@ nginx_servers:
   - redirect-ssl
 nginx_ssl_servers:
   - galaxy
+  - sentry
 nginx_enable_default_server: false
 nginx_conf_http:
   client_max_body_size: 1g
@@ -334,3 +341,15 @@ telegraf_plugins_extra:
       - service_address = ":8125"
       - metric_separator = "."
       - allowed_pending_messages = 10000
+
+# TIaaS setup
+tiaas_dir: /srv/tiaas
+tiaas_admin_user: admin
+tiaas_admin_pass: changeme
+
+
+
+
+
+
+
